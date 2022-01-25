@@ -5,7 +5,7 @@ namespace Logger{
     Logger::Logger(unsigned int max_len, uint8_t options)
      : m_options(options), m_max_len(max_len), m_file_name("logger_default.txt")
     {
-        m_log_statement.reserve(128); // 리저브를 작은수로 하면 어케될까 테스트해보기
+        m_log_statement.reserve(m_max_len);
         m_levels[0] = "INFO";
         m_levels[1] = "TRACE";
         m_levels[2] = "ERROR";

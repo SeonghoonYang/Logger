@@ -8,7 +8,11 @@ using namespace std;
 int main()
 {
     Logger::Logger log;
-    for(int i = 0; i < 100; i++)
-        log.printLog(0, "sex", "ee");
+
+    log.setMsecOpt(true);
+    log.setWdayOpt(true);
+
+    // test
+    log.printLog(0, "127.0.0.1", "Hello", "Logger!");
     return 0;
 }
