@@ -45,6 +45,7 @@ namespace Logger
     public:
         Logger(unsigned int max_len = 128, uint8_t options = 24);
 
+        // void setOptions 각각으로
         void setOptions(uint8_t options);
         void setDateOpt(bool);
         void setTimeOpt(bool);

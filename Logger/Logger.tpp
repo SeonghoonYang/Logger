@@ -66,11 +66,15 @@ namespace Logger
         }
  
         m_log_statement.append("(");
-        for(int i = index - 1; i >= 0; i--) 
+        
+        if(index != 0) m_log_statement.append(prefix_infos[index - 1]);
+
+        for(int i = index - 2; i >= 0; i--) 
         {
+            m_log_statement.append(" ");
             m_log_statement.append(prefix_infos[i]);
-            if (i != 0) m_log_statement.append(" ");
         }
+
         m_log_statement.append(") ");
         m_log_statement.append(log);
 
