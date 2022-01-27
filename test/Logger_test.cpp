@@ -11,27 +11,31 @@ int main()
 {
 
     /* TODO:
-        1. cout, cerr 처리
-        2. 파일입출력 처리
-        3. 터미널 색상처리
-        4. options함수 오버로딩 구현
-        5. 레벨 만들기 구현
+        1. cout, cerr 처리 o
+        2. 파일입출력 처리 o
+        3. 터미널 색상처리 o
+        4. options함수 오버로딩 구현 o
+        5. 레벨 만들기 구현 o
         6. 멀티스레딩환경 테스트
     */
-    Logger::Logger log("Logger_ex.txt");
+    log::Logger log("Logger_ex.txt");
 
     log.setMsecOpt(true);
     log.setWdayOpt(true);
 
+    enum MyLogLevel {
+        I,
+        T,
+        W,
+        E,
+        D
+    };
 
-    log.setWdayOpt(false);
-    log.setFileOpt(true);
-    // test
-    for(int i = 0; i < 10; i++) {
-        log.printLog(2, "127.0.0.1", "Hello", "Logger!");
-    }
-    
-    log.setFileOpt(false);
+    log.printLog(T, "trace", "127.0.0.1!!");
+    log.printLog(I, "test");
+    log.addLevel(D, "debug..", log::Color::B_CYAN);
+    log.printLog(D, "This is Debug");
+    log.printLog(E, "Funny", "Error");
 
     return 0;
 }
