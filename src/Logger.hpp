@@ -55,10 +55,11 @@ namespace log
         template<typename String, typename... Strings>
         void concatLog(const String& log, Strings... logs);
 
-        // std::ofstream       m_fout;
-
     public:
         Logger(const std::string& file_name, unsigned int max_len = 128);
+        Logger(const Logger& rhs);
+        Logger& operator= (const Logger& rhs);
+        ~Logger();
 
         void setOptions(
             bool on_date = true,
@@ -98,11 +99,12 @@ namespace log
     template<typename String, typename... Strings>
     void Logger::printLog(unsigned int level_num, const String& log, Strings... logs)
     {
+        
+        // order safe
+        std::lock_guard<std::mutex> lock(s_log_mtx);
+        
         // get very first currenttime
         auto _time = std::chrono::system_clock::now();
-
-        // order safe
-        // std::lock_guard<std::mutex> lock(s_log_mtx);
         
         // Level
         m_log_statement.append("[");

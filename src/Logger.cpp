@@ -22,7 +22,7 @@ namespace log
     };
 
     Logger::Logger(const std::string& file_name, unsigned int max_len)
-     : m_max_len(max_len), m_options(0), m_file_name(file_name)
+    : m_max_len(max_len), m_options(0), m_file_name(file_name)
     {
         setOptions(true, true, false, false, false, false);
         m_log_statement.reserve(m_max_len);
@@ -31,6 +31,23 @@ namespace log
         m_levels[2] = std::make_pair("WARN", Color::YELLOW);
         m_levels[3] = std::make_pair("ERROR", Color::B_RED);
     }
+
+    Logger::Logger(const Logger& rhs)
+    : m_max_len(rhs.m_max_len), m_options(rhs.m_options),
+      m_file_name(rhs.m_file_name), m_levels(rhs.m_levels)
+    {}
+
+    Logger& Logger::operator= (const Logger& rhs)
+    {
+        m_max_len = rhs.m_max_len;
+        m_options = rhs.m_options;
+        m_file_name = rhs.m_file_name;
+        m_levels = rhs.m_levels;
+        return *this;
+    }
+
+    Logger::~Logger()
+    {}
     
     void Logger::addLevel(
         unsigned int        level_num,
