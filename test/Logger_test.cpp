@@ -1,4 +1,4 @@
-#include "Logger.hpp"
+#include "../src/Logger.hpp"
 #include <thread>
 #include <iostream>
 #include <memory>
@@ -18,15 +18,20 @@ int main()
         5. 레벨 만들기 구현
         6. 멀티스레딩환경 테스트
     */
-    Logger::Logger log;
+    Logger::Logger log("Logger_ex.txt");
 
     log.setMsecOpt(true);
     log.setWdayOpt(true);
 
+
+    log.setWdayOpt(false);
+    log.setFileOpt(true);
     // test
-    for(int i = 0; i < 1000; i++) {
+    for(int i = 0; i < 10; i++) {
         log.printLog(2, "127.0.0.1", "Hello", "Logger!");
     }
+    
+    log.setFileOpt(false);
 
     return 0;
 }

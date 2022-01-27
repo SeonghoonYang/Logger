@@ -1,5 +1,77 @@
-namespace Logger
-{    
+#pragma once
+
+#ifndef LOGGER_HPP
+#define LOGGER_HPP
+
+#include <map>
+#include <string>
+#include <cstring>
+
+#include <chrono>
+#include <ctime>
+#include <mutex>
+
+#include <iostream>
+#include <fstream>
+
+namespace Logger 
+{
+    constexpr unsigned int TIME_INFO_NUM = 4;
+
+    constexpr uint8_t COUT_FLAG = 1;
+    constexpr uint8_t MSEC_FLAG = 2;
+    constexpr uint8_t WDAY_FLAG = 4;
+    constexpr uint8_t TIME_FLAG = 8;
+    constexpr uint8_t DATE_FLAG = 16;
+    constexpr uint8_t FILE_FLAG = 128;
+
+    class Logger
+    {
+    private:
+        static std::mutex   s_log_mtx;
+    
+        unsigned int        m_max_len;
+        uint8_t             m_options;
+    
+        std::string         m_file_name;
+        std::string         m_log_statement;
+        std::map<int, std::string>  m_levels;
+        
+        void switchOnOff(bool, uint8_t);
+
+        void concatLog() { return; }
+
+        template<typename String, typename... Strings>
+        void concatLog(const String& log, Strings... logs);
+
+        // std::ofstream       m_fout;
+
+    public:
+        Logger(const std::string& file_name, unsigned int max_len = 128);
+
+        void setOptions(
+            bool on_date = true,
+            bool on_time = true,
+            bool on_msec = false,
+            bool on_wday = false,
+            bool on_cout = false,
+            bool on_file = false
+            );
+        void setDateOpt(bool);
+        void setTimeOpt(bool);
+        void setWdayOpt(bool);
+        void setMsecOpt(bool);
+        void setCoutOpt(bool);
+        void setFileOpt(bool);
+
+        void setFileName(const std::string& file_name = "Logger_log.txt");
+
+        void setLevels(unsigned int level_num, const std::string& level_name);
+
+        template<typename String, typename... Strings>
+        void printLog(unsigned int level_num, const String& log, Strings... logs);
+    };
+
     template<typename String, typename... Strings>
     void Logger::concatLog(const String& log, Strings... logs)
     {
@@ -14,6 +86,9 @@ namespace Logger
         // get very first currenttime
         auto _time = std::chrono::system_clock::now();
 
+        // order safe
+        // std::lock_guard<std::mutex> lock(s_log_mtx);
+        
         // Level
         m_log_statement.append("[");
         m_log_statement.append(m_levels[level_num]);
@@ -38,9 +113,7 @@ namespace Logger
         
         // Time
         if (m_options & TIME_FLAG)
-        {
             sprintf(prefix_infos[index++], "%02d:%02d:%02d", time_info.tm_hour, time_info.tm_min, time_info.tm_sec);
-        }
 
         // Wday
         if (m_options & WDAY_FLAG)
@@ -61,15 +134,14 @@ namespace Logger
 
         // Date
         if (m_options & DATE_FLAG)
-        {
             sprintf(prefix_infos[index++], "%04d-%02d-%02d", time_info.tm_year + 1900, time_info.tm_mon + 1, time_info.tm_mday);
-        }
  
         m_log_statement.append("(");
         
-        if(index != 0) m_log_statement.append(prefix_infos[index - 1]);
+        if (index != 0) 
+            m_log_statement.append(prefix_infos[index - 1]);
 
-        for(int i = index - 2; i >= 0; i--) 
+        for (int i = index - 2; i >= 0; i--) 
         {
             m_log_statement.append(" ");
             m_log_statement.append(prefix_infos[i]);
@@ -79,13 +151,39 @@ namespace Logger
         m_log_statement.append(log);
 
         concatLog(logs...);
+
         m_log_statement.append("\n");
 
-        // ?
-        std::cerr << m_log_statement;
+        if (m_options & FILE_FLAG)
+        {
+            try
+            {
+                // slow
+                std::ofstream fout(m_file_name, std::ios::app);
+                if (!fout.is_open())
+                {
+                    throw std::string("Logger: ")
+                        + m_file_name 
+                        + " file ostream error. log-";
+                }
+                fout << m_log_statement;
+            }
+            catch (const std::string& msg)
+            {
+                std::cerr << msg + m_log_statement;
+                setFileOpt(true); // recover
+            }
+        }
+        else 
+        {
+            if (m_options & COUT_FLAG)
+                std::cout << m_log_statement << std::flush;
+            else
+                std::cerr << m_log_statement;
+        }
 
         m_log_statement.clear();
-        if(m_log_statement.size() > m_max_len)
-            m_log_statement.reserve(m_max_len);
     }
 }
+
+#endif
